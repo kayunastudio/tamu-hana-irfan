@@ -153,8 +153,8 @@
 </div>
 
 <script>
-    // UBAH LINK UTAMA UNDANGAN ANDA DI SINI
-    const LINK_UNDANGAN_UTAMA = "https://hana-irfan.kayunastudio.my.id";
+    // UBAH LINK UTAMA UNDANGAN BERDASARKAN DOMAIN UTAMA KLIEN ARJUN & SALMA
+    const LINK_UNDANGAN_UTAMA = "https://kayuna.studio/arjun-salma";
 
     function handleFile(event) {
         const file = event.target.files[0];
@@ -194,14 +194,26 @@
                 }
             }
 
-            // Encode nama tamu agar aman masuk ke URL (spasi menjadi %20 atau +)
-            const namaEncoded = encodeURIComponent(namaTamu);
+            // Teks mentah ditulis apa adanya di template literal JavaScript
+            const teksMentah = `Assalamualaikum Wr.Wb *${namaTamu}*,
+
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami.
+
+Silakan buka tautan di bawah ini untuk melihat detail undangan resmi digital kami:
+${LINK_UNDANGAN_UTAMA}?to=${encodeURIComponent(namaTamu)}
+
+Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan untuk hadir dan memberikan doa restu.
+
+*Mohon maaf perihal undangan hanya dibagikan melalui pesan ini karena keterbatasan jarak & waktu.* Pesan ini berfungsi sebagai pengganti undangan fisik resmi. Terima kasih banyak atas perhatiannya.
+
+Kami yang berbahagia,
+*Arjun & Salma*`;
             
-            // Teks pesan WhatsApp otomatis
-            const pesanTeks = `Assalamualaikum Wr.Wb *${namaTamu}*, Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami %0A%0A${LINK_UNDANGAN_UTAMA}?to=${namaEncoded}%0A%0AMerupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan untuk hadir dan memberikan doa restu. *Mohon maaf perihal undangan hanya di bagikan melalui pesan ini, karena keterbatasan jarak & waktu.* Pesan ini adalah undangan resmi sebagai pengganti apabila undangan cetak *BELUM/TIDAK DITERIMA* oleh Bapak/Ibu/Saudara/I Diharapkan melalui media ini sebagai pengganti undangan resmi tanpa mengurangi rasa hormat dengan maksud dan tujuan kami dapat tersampaikan. Terima kasih banyak atas perhatiannya. Kami yang berbahagia, *Nama kedua mempelai*`;
+            // Mengencode seluruh blok teks mentah secara aman
+            const pesanTeksEncoded = encodeURIComponent(teksMentah);
             
             // Buat URL API WhatsApp resmi
-            const waLink = `https://api.whatsapp.com/send?phone=${noHp}&text=${pesanTeks}`;
+            const waLink = `https://api.whatsapp.com/send?phone=${noHp}&text=${pesanTeksEncoded}`;
 
             // Masukkan data ke dalam baris tabel HTML
             const tr = document.createElement('tr');
