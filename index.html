@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Generator - Kirim Undangan Massal</title>
+    <!-- Library SheetJS untuk membaca file Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f4f7f5;
+            color: #333;
+            padding: 30px 15px;
+            display: flex;
+            justify-content: center;
+        }
+        .admin-box {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        h2 { color: #4A5D4E; margin-bottom: 5px; }
+        p { font-size: 0.9rem; color: #666; margin-bottom: 20px; }
+        .upload-btn {
+            border: 2px dashed #4A5D4E;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #f9fbf9;
+        }
+        .upload-btn:hover { background: #eef2ef; }
+        input[type="file"] { display: none; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th { background-color: #4A5D4E; color: white; }
+        .btn-send {
+            background-color: #25D366; /* Warna WhatsApp */
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .btn-send:hover { background-color: #128C7E; }
+
+        /* ==========================================================================
+           STYLE TAMBAHAN: BRANDING FOOTER KAYUNA STUDIO
+           ========================================================================== */
+        .studio-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed #ddd;
+            text-align: center;
+            font-size: 0.82rem;
+            color: #777;
+        }
+        .studio-footer p {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .studio-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .studio-links a {
+            color: #4A5D4E;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+        .studio-links a:hover {
+            color: #C5A059; /* Aksen Gold lembut */
+        }
+        .studio-links svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-box">
+    <h2>Generator Undangan via Excel</h2>
+    <p>Format Excel wajib memiliki dua kolom utama di baris pertama: <b>Nama</b> dan <b>No HP</b>.</p>
+    
+    <!-- Tombol Upload -->
+    <div class="upload-btn" onclick="document.getElementById('excel-file').click()">
+        <span>Click / Seret File Excel (.xlsx) Anda di Sini</span>
+        <input type="file" id="excel-file" accept=".xlsx, .xls" onchange="handleFile(event)">
+    </div>
+
+    <!-- Tabel Tampilan Data -->
+    <div id="result-area" style="display:none;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama Tamu</th>
+                    <th>No. HP</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Data Excel akan masuk ke sini otomatis -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ELEMEN BARU: FOOTER ATRIBUSI LAYANAN KAYUNA STUDIO -->
+    <footer class="studio-footer">
+        <p>System Developed &amp; Maintained by</p>
+        <div class="studio-links">
+            <!-- Tautan Website Utama -->
+            <a href="https://kayunastudio.my.id" target="_blank">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
+                kayunastudio
+            </a>
+            <!-- Tautan Instagram -->
+            <a href="https://instagram.com/kayunastd/" target="_blank">
+                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                @kayunastd
+            </a>
+            <!-- Tautan Tiktok Baru Dengan Ikon Logo TikTok Presisi -->
+            <a href="https://tiktok.com/@kayuna.studio" target="_blank">
+                <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31.01 2.61-.01 3.91.02.08 1.53.63 3.02 1.73 4.09.91.91 2.14 1.47 3.42 1.62V9.61c-1.39-.12-2.74-.75-3.72-1.74-.15-.15-.29-.31-.41-.47v6.33c.09 2.12-.91 4.23-2.67 5.43-1.89 1.34-4.47 1.5-6.52.42-2.22-1.12-3.63-3.63-3.48-6.13.11-2.42 1.84-4.57 4.22-5.07.95-.21 1.95-.12 2.85.25V4.76c-1.21-.38-2.25-1.19-2.92-2.27V.02h3.01z"/></svg>
+                @kayuna.studio
+            </a>
+        </div>
+    </footer>
+</div>
+
+<script>
+    // UBAH LINK UTAMA UNDANGAN ANDA DI SINI
+    const LINK_UNDANGAN_UTAMA = "https://hana-irfan.kayunastudio.my.id";
+
+    function handleFile(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Ambil sheet pertama di file Excel
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            
+            // Mengubah baris Excel menjadi format JSON Array
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+            
+            tampilkanData(jsonRows);
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+    function tampilkanData(rows) {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = ""; // Reset tabel lama
+        
+        rows.forEach(row => {
+            // Membaca kolom Excel (Pastikan di Excel judul kolomnya ditulis "Nama" dan "No HP")
+            const namaTamu = row["Nama"] || row["nama"] || "Tamu Tanpa Nama";
+            let noHp = row["No HP"] || row["No. HP"] || row["hp"] || "";
+
+            if(noHp) {
+                // Standarisasi nomor HP Indonesia ke format internasional (62)
+                noHp = noHp.toString().trim();
+                if (noHp.startsWith("0")) {
+                    noHp = "62" + noHp.slice(1);
+                }
+            }
+
+            // Encode nama tamu agar aman masuk ke URL (spasi menjadi %20 atau +)
+            const namaEncoded = encodeURIComponent(namaTamu);
+            
+            // Teks pesan WhatsApp otomatis
+            const pesanTeks = `Assalamualaikum Wr.Wb *${namaTamu}*, Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami %0A%0A${LINK_UNDANGAN_UTAMA}?to=${namaEncoded}%0A%0AMerupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan untuk hadir dan memberikan doa restu. *Mohon maaf perihal undangan hanya di bagikan melalui pesan ini, karena keterbatasan jarak & waktu.* Pesan ini adalah undangan resmi sebagai pengganti apabila undangan cetak *BELUM/TIDAK DITERIMA* oleh Bapak/Ibu/Saudara/I Diharapkan melalui media ini sebagai pengganti undangan resmi tanpa mengurangi rasa hormat dengan maksud dan tujuan kami dapat tersampaikan. Terima kasih banyak atas perhatiannya. Kami yang berbahagia, *Nama kedua mempelai*`;
+            
+            // Buat URL API WhatsApp resmi
+            const waLink = `https://api.whatsapp.com/send?phone=${noHp}&text=${pesanTeks}`;
+
+            // Masukkan data ke dalam baris tabel HTML
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${namaTamu}</b></td>
+                <td>+${noHp}</td>
+                <td><a href="${waLink}" target="_blank" class="btn-send">Kirim WA 💬</a></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Tampilkan area tabel
+        document.getElementById('result-area').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
